@@ -2,8 +2,10 @@
 
 Capture, store, and replay 433MHz RF signals with ESP32 using a web interface and REST API. Easily integrates with Home Assistant and other automation tools.
 
-<img src="images/subghz.png" alt="SubGHz Demo" height="100"/>
-<img src="images/home-assistant.png" alt="Home Assistant Integration" height="100"/>
+<div>
+  <img src="images/subghz.png" alt="SubGHz Demo" height="100"/>
+  <img src="images/home-assistant.png" alt="Home Assistant Integration" height="100"/>
+</div>
 
 > Works like the Flipper Zero's SubGHz module, but with a modern web interface and REST API.
 
