@@ -1,0 +1,62 @@
+<div class="card">
+    <div class="card-title">RF Signal Processing</div>
+    <div class="input-group">
+        <label>Noise Filtering</label>
+        <div class="toggle-switch">
+            <input type="checkbox" id="noiseFilterToggle" class="toggle-input">
+            <label for="noiseFilterToggle" class="toggle-label">
+                <span class="toggle-text">Enabled</span>
+            </label>
+        </div>
+        <div class="input-group" style="margin-top: 15px;">
+            <label>Noise Threshold (count)</label>
+            <input type="number" id="noiseThreshold" min="1" max="20" value="3">
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Signal Monitoring</div>
+    <div class="input-grid">
+        <div class="input-group">
+            <label>Monitor Interval (ms)</label>
+            <input type="number" id="monitorInterval" min="50" max="5000" value="200">
+        </div>
+        <div class="input-group">
+            <label>Max Signal History</label>
+            <input type="number" id="maxSignalHistory" min="5" max="50" value="15">
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Transmission Settings</div>
+    <div class="input-grid">
+        <div class="input-group">
+            <label>Default Protocol</label>
+            <select id="defaultProtocol">
+                <option value="1">Protocol 1</option>
+                <option value="2" selected>Protocol 2</option>
+                <option value="3">Protocol 3</option>
+                <option value="4">Protocol 4</option>
+                <option value="5">Protocol 5</option>
+                <option value="6">Protocol 6</option>
+                <option value="7">Protocol 7</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Default Pulse Length (µs)</label>
+            <input type="number" id="defaultPulseLength" min="100" max="1000" value="650">
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">System Diagnostics</div>
+    <div class="button-group">
+        <button onclick="resetToDefaults()" class="warning">Reset to Defaults</button>
+        <button onclick="exportConfig()" class="success">Export Config</button>
+        <button onclick="importConfig()" class="primary">Import Config</button>
+        <button onclick="saveSettings()" class="primary">Save Settings</button>
+    </div>
+</div>

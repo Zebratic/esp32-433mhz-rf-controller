@@ -1,0 +1,13 @@
+#ifndef WIFI_CONFIG_H
+#define WIFI_CONFIG_H
+
+// WiFi Configuration
+// Copy this file to wifi_config.h and edit the values below
+// wifi_config.h is ignored by git to protect your credentials
+
+#define WIFI_SSID      "YOUR_WIFI_SSID"
+#define WIFI_PASS      "YOUR_WIFI_PASSWORD"
+#define MAX_RETRY      10
+
+#endif // WIFI_CONFIG_H
+

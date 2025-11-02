@@ -1,0 +1,38 @@
+<div class="card">
+    <div class="card-title">Manual Signal Entry</div>
+    <div class="input-grid">
+        <div class="input-group">
+            <label for="manualName">Signal Name</label>
+            <input type="text" id="manualName" placeholder="Enter signal name">
+        </div>
+        <div class="input-group">
+            <label for="manualCode">Signal Code</label>
+            <input type="text" id="manualCode" placeholder="Signal code (decimal or hex)">
+        </div>
+        <div class="input-group">
+            <label for="manualBits">Bit Length</label>
+            <input type="number" id="manualBits" min="8" max="64" placeholder="8-64 bits">
+        </div>
+        <div class="input-group">
+            <label for="manualProtocol">Protocol</label>
+            <select id="manualProtocol">
+                <option value="1">Protocol 1</option>
+                <option value="2" selected>Protocol 2</option>
+                <option value="3">Protocol 3</option>
+                <option value="4">Protocol 4</option>
+                <option value="5">Protocol 5</option>
+                <option value="6">Protocol 6</option>
+                <option value="7">Protocol 7</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="manualPulse">Pulse Length (µs)</label>
+            <input type="number" id="manualPulse" min="100" max="1000" value="650">
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button onclick="testManualSignal()" class="primary">Test Signal</button>
+        <button onclick="saveManualSignal()" class="success">Save Signal</button>
+    </div>
+</div>

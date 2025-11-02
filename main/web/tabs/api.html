@@ -1,0 +1,279 @@
+<div class="card">
+    <h2>API Documentation</h2>
+    <p>All API endpoints return JSON responses. Error responses include an <code>error</code> field with a descriptive message.</p>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('info')">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/info</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="info">
+            <h3>Get Device Information</h3>
+            <p>Get device information and status.</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "device": "ESP32 433MHz Controller",
+  "ip": "192.168.1.100",
+  "signalCount": 5,
+  "receiverPin": 4,
+  "transmitterPin": 2
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('signal-history')">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/signal-history</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="signal-history">
+            <h3>Get Signal History</h3>
+            <p>Get all tracked signals and the latest detected signal.</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "serverTime": 1234567890,
+  "signals": [
+    {
+      "code": 12345678,
+      "bitLength": 24,
+      "protocol": 1,
+      "pulseLength": 350,
+      "count": 42,
+      "firstSeen": 1234567000,
+      "lastSeen": 1234567890
+    }
+  ],
+  "latest": {
+    "code": 12345678,
+    "bitLength": 24,
+    "protocol": 1,
+    "pulseLength": 350,
+    "count": 1,
+    "new": true
+  }
+}</code></pre>
+
+            <h4>Fields</h4>
+            <ul>
+                <li><code>serverTime</code>: Current server time in microseconds since boot</li>
+                <li><code>signals</code>: Array of all tracked signals</li>
+                <li><code>signals[].firstSeen</code>: Timestamp in microseconds when first detected</li>
+                <li><code>signals[].lastSeen</code>: Timestamp in microseconds when last detected</li>
+                <li><code>signals[].count</code>: Number of times this signal was detected</li>
+                <li><code>latest</code>: Most recently detected signal (if available)</li>
+                <li><code>latest.new</code>: <code>true</code> if a new signal was detected since last poll</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('signals-get')">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/signals</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="signals-get">
+            <h3>Get All Saved Signals</h3>
+            <p>Get all saved signals.</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "signals": [
+    {
+      "name": "Garage Door",
+      "code": 12345678,
+      "bitLength": 24,
+      "protocol": 1,
+      "pulseLength": 350
+    }
+  ]
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('signals-post')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/signals</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="signals-post">
+            <h3>Save a New Signal</h3>
+            <p>Save a new signal.</p>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "name": "My Signal",
+  "code": 12345678,
+  "bitLength": 24,
+  "protocol": 1,
+  "pulseLength": 350
+}</code></pre>
+
+            <h4>Response (Success)</h4>
+            <pre><code>{
+  "success": true,
+  "signalIndex": 0
+}</code></pre>
+
+            <h4>Response (Error)</h4>
+            <pre><code>{
+  "error": "Signal with this name or code already exists"
+}</code></pre>
+
+            <h4>Validation</h4>
+            <ul>
+                <li><code>name</code>: Required, string, non-empty</li>
+                <li><code>code</code>: Required, number</li>
+                <li><code>bitLength</code>: Required, number, 8-64</li>
+                <li><code>protocol</code>: Required, number, 1-7</li>
+                <li><code>pulseLength</code>: Required, number</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('signals-put')">
+            <span class="api-method put">PUT</span>
+            <span class="api-path">/api/signals/{index}</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="signals-put">
+            <h3>Update Signal Name</h3>
+            <p>Update an existing signal's name.</p>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "name": "Updated Signal Name"
+}</code></pre>
+
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('signals-delete')">
+            <span class="api-method delete">DELETE</span>
+            <span class="api-path">/api/signals/{index}</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="signals-delete">
+            <h3>Delete Signal</h3>
+            <p>Delete a saved signal by index.</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('transmit-direct')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/transmit</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="transmit-direct">
+            <h3>Transmit Signal Directly</h3>
+            <p>Transmit a signal directly without saving (for replay).</p>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "code": 12345678,
+  "bitLength": 24,
+  "protocol": 1,
+  "pulseLength": 350
+}</code></pre>
+
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('transmit-index')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/transmit/{index}</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="transmit-index">
+            <h3>Transmit Signal by Index</h3>
+            <p>Transmit a saved signal by index.</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('transmit-name')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/transmit/name/{name}</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="transmit-name">
+            <h3>Transmit Signal by Name</h3>
+            <p>Transmit a saved signal by name (URL-encoded).</p>
+            
+            <h4>Example</h4>
+            <pre><code>POST /api/transmit/name/Garage%20Door</code></pre>
+
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('clear-tracking')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/clear-tracking</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="clear-tracking">
+            <h3>Clear Tracking History</h3>
+            <p>Clear all tracked signal history (does not delete saved signals).</p>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+
+    <div class="api-endpoint">
+        <button class="api-header" onclick="toggleApiEndpoint('settings')">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/settings</span>
+            <span class="api-toggle">▼</span>
+        </button>
+        <div class="api-content" id="settings">
+            <h3>Save Settings</h3>
+            <p>Save application settings (client-side storage).</p>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "key": "value"
+}</code></pre>
+
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true
+}</code></pre>
+        </div>
+    </div>
+</div>
+

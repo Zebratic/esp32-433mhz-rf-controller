@@ -1,0 +1,33 @@
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled files
+*.o
+*.obj
+*.elf
+*.bin
+*.a
+
+# Environment
+.env
+
+# WiFi Configuration (contains sensitive credentials)
+main/wifi_config.h
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc

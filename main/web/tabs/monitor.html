@@ -1,0 +1,44 @@
+<div class="card">
+    <div class="card-title">Signal Monitor</div>
+    <div id="lastSignalDisplay" class="last-signal-display">
+        <div class="signal-details">
+            <div class="detail">
+                <span class="label">Code:</span>
+                <span id="lastCode">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Bits:</span>
+                <span id="lastBits">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Protocol:</span>
+                <span id="lastProtocol">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Pulse:</span>
+                <span id="lastPulse">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-section">
+        <div class="console-header">
+            <h3>Signal History</h3>
+            <button onclick="clearTracking()">Clear</button>
+        </div>
+        <div id="signalDisplay" class="console">
+            <div class="empty-state">Waiting for RF signals...</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Capture Signal</div>
+    <div class="input-group">
+        <label for="signalName">Save Signal Name</label>
+        <input type="text" id="signalName" placeholder="Enter signal name">
+    </div>
+    <div class="button-group">
+        <button onclick="saveCurrentSignalFromInput()" class="primary">Save Signal</button>
+    </div>
+</div>
