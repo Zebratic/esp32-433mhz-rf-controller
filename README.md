@@ -116,18 +116,21 @@ For additional guidance, refer to the included ESP32 DevKit pinout diagram and y
 
 ### Configuration
 
-1. **Configure WiFi Credentials**
-   - Copy the example WiFi config file:
+1. **Configure WiFi and GPIO Pins**
+   - Copy the example config file:
      ```bash
-     cp main/wifi_config.h.example main/wifi_config.h
+     cp main/config.h.example main/config.h
      ```
-   - Edit `main/wifi_config.h` with your WiFi credentials:
+   - Edit `main/config.h` with your WiFi credentials and GPIO pins:
      ```c
      #define WIFI_SSID      "YourWiFiSSID"
      #define WIFI_PASS      "YourWiFiPassword"
      #define MAX_RETRY      10
+     
+     #define RF_RECEIVER_PIN    GPIO_NUM_4
+     #define RF_TRANSMITTER_PIN GPIO_NUM_2
      ```
-   - Note: `wifi_config.h` is git-ignored to protect your credentials
+   - Note: `config.h` is git-ignored to protect your credentials
 
 ### Build and Flash
 
@@ -207,7 +210,7 @@ esp32-433mhz-rf-controller/
 ├── main/
 │   ├── main.c              # Main application code
 │   ├── CMakeLists.txt     # Build configuration
-│   ├── wifi_config.h      # WiFi credentials (git-ignored)
+│   ├── config.h            # WiFi and GPIO configuration (git-ignored)
 │   └── web/               # Embedded web interface
 │       ├── css/           # Stylesheets
 │       ├── js/            # JavaScript modules

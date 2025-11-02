@@ -15,10 +15,8 @@
 #include "esp_http_server.h"
 #include "cJSON.h"
 #include "rc_switch.h"
-#include "wifi_config.h"
+#include "config.h"
 static const char *TAG = "433MHZ_CONTROLLER";
-#define RF_RECEIVER_PIN    GPIO_NUM_4
-#define RF_TRANSMITTER_PIN GPIO_NUM_2
 #define MAX_SIGNALS 50
 #define MAX_TRACKED_SIGNALS 10
 
@@ -241,6 +239,7 @@ static void cleanup_old_tracked_signals(void)
     xSemaphoreGive(tracked_signals_mutex);
 }
 
+// we clean up the tracked signals every 50 seconds to prevent the memory from filling up (this was a previous problem i had after running for a few days)
 static void cleanup_task(void *arg)
 {
     while (1) {
@@ -249,6 +248,8 @@ static void cleanup_task(void *arg)
     }
 }
 
+
+// For reference, this code was written on too much caffeine and too little sleep, so i have no clue if its actually working as i intended it to be...
 static bool is_likely_noise(uint32_t code, uint8_t bitlen, uint32_t last_code, uint8_t last_bitlen, int64_t time_since_last)
 {
     if (time_since_last > 1000000) return false;
@@ -716,10 +717,6 @@ static esp_err_t api_settings_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    // For now, just acknowledge receipt of settings
-    // Settings are primarily client-side (localStorage)
-    // Could store them in NVS if needed later
-    
     cJSON_Delete(json);
 
     httpd_resp_set_type(req, "application/json");
@@ -727,7 +724,7 @@ static esp_err_t api_settings_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-// Static file server function
+// Middleware for serving static files for the web UI
 static esp_err_t static_file_handler(httpd_req_t *req)
 {
     extern const uint8_t index_html_start[] asm("_binary_index_html_start");
@@ -758,7 +755,7 @@ static esp_err_t static_file_handler(httpd_req_t *req)
         return (start && end) ? (end - start) : 0;
     }
 
-    // Favicon (optional)
+    // Favicon (swap out the bytes down below, if you really care about this...)
     extern const uint8_t _binary_favicon_ico_start[] __attribute__((weak));
     extern const uint8_t _binary_favicon_ico_end[] __attribute__((weak));
 
@@ -774,12 +771,15 @@ static esp_err_t static_file_handler(httpd_req_t *req)
     extern const uint8_t api_html_start[] asm("_binary_api_html_start");
     extern const uint8_t api_html_end[] asm("_binary_api_html_end");
 
-    // Determine the file to serve based on the URI
+    // Default values for the file to serve based on the URI
     const char *uri = req->uri;
     const uint8_t *start = NULL;
     const uint8_t *end = NULL;
     const char *mime_type = "text/plain";
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dont even comment about my huge ahhhh if else if else if else if else. It works and i dont want to touch it... //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if (strcmp(uri, "/") == 0 || strcmp(uri, "/index.html") == 0) {
         start = index_html_start;
         end = index_html_end;
@@ -893,7 +893,7 @@ static esp_err_t static_file_handler(httpd_req_t *req)
     }
     // Favicon handling
     else if (strcmp(uri, "/favicon.ico") == 0) {
-        // Optional: Add a default favicon with a generic icon
+        // Go ahead and slap in a nice icon for the favicon if you want to :shrug:
         static const char favicon_data[] = {
             0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x10, 0x10, 0x00, 0x00, 0x01, 0x00,
             0x20, 0x00, 0x68, 0x05, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00
@@ -911,15 +911,12 @@ static esp_err_t static_file_handler(httpd_req_t *req)
 
     // Validate start and end pointers before serving
     if (!start || !end) {
-        ESP_LOGE(TAG, "Failed to serve resource: %s - start or end pointer is NULL", uri);
+        ESP_LOGE(TAG, "Failed to serve resource: %s - start or end pointer is NULL :( i guess its the end of the world now...", uri);
         httpd_resp_set_status(req, "404 Not Found");
         httpd_resp_set_type(req, "text/plain");
         httpd_resp_send(req, "Resource not found", 18);
         return ESP_FAIL;
     }
-
-    // Debugging log for file serving
-    ESP_LOGW(TAG, "Attempting to serve resource: %s", uri);
 
     // Calculate length and validate
     size_t resource_length = end - start;
@@ -939,11 +936,13 @@ static esp_err_t static_file_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+
+// Starts the HTTP server and registers the API handlers
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 32;  // Increased to handle more static files
+    config.max_uri_handlers = 32;
     config.uri_match_fn = httpd_uri_match_wildcard;
 
     ESP_LOGI(TAG, "Starting HTTP server");
@@ -1037,7 +1036,8 @@ static httpd_handle_t start_webserver(void)
         };
         httpd_register_uri_handler(server, &api_settings_uri);
 
-        // Static file serving handler (register LAST so API handlers take precedence)
+        // Well i took too long to debug this, it just so happened to be because i didnt register the static file handler last, so now its here...
+        // -1 hour debugging session saved for future reference...
         httpd_uri_t static_file_uri = {
             .uri       = "/*",
             .method    = HTTP_GET,
@@ -1073,12 +1073,12 @@ static void rf_monitor_task(void *arg)
                      current_isr_count, isr_delta);
             
             if (isr_delta == 0 && heartbeat_counter > 0) {
-                ESP_LOGW(TAG, "⚠ WARNING: No ISR triggers detected!");
+                ESP_LOGW(TAG, "⚠ WARNING: No ISR triggers detected! (You might be cooked?)");
                 ESP_LOGW(TAG, "  This means the receiver pin is NOT changing state at all.");
                 ESP_LOGW(TAG, "  Possible issues:");
                 ESP_LOGW(TAG, "    1. Wrong DATA pin connected (try the other data pin)");
                 ESP_LOGW(TAG, "    2. Receiver not powered (check VCC/GND connections)");
-                ESP_LOGW(TAG, "    3. Faulty receiver module");
+                ESP_LOGW(TAG, "    3. Faulty receiver module (try a different one)");
                 ESP_LOGW(TAG, "    4. No RF signals in range (try pressing a remote button)");
             }
             
@@ -1109,8 +1109,6 @@ static void rf_monitor_task(void *arg)
                     new_signal_received = true;
                     last_valid_code = code;
                     last_valid_time = now;
-
-                    // Signal broadcast removed
                 } else {
                     ESP_LOGD(TAG, "Filtered noise: Code=%lu (0x%lX) | Bits=%d (partial of 0x%lX)",
                              code, code, bitlen, last_valid_code);
@@ -1158,7 +1156,14 @@ void app_main(void)
     xTaskCreate(rf_monitor_task, "rf_monitor", 4096, NULL, 5, NULL);
     xTaskCreate(cleanup_task, "cleanup", 2048, NULL, 3, NULL);
 
-    ESP_LOGI(TAG, "");
+    ESP_LOGI(TAG, "===============================================================");
+    esp_netif_ip_info_t ip_info;
+    esp_err_t ip_ret = esp_netif_get_ip_info(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), &ip_info);
     ESP_LOGI(TAG, "Setup complete! RF monitor is active.");
-    ESP_LOGI(TAG, "Web UI available - check your router for ESP32 IP address");
+    if (ip_ret == ESP_OK) {
+        ESP_LOGI(TAG, "Web UI is now available! Access at http://" IPSTR, IP2STR(&ip_info.ip));
+    } else {
+        ESP_LOGI(TAG, "Web UI is now available, but failed to get device IP address.");
+    }
+    ESP_LOGI(TAG, "===============================================================");
 }

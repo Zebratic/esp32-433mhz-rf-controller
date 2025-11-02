@@ -1,0 +1,28 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include "driver/gpio.h"
+
+// WiFi Configuration
+// Copy this file to config.h and edit the values below
+// config.h is ignored by git to protect your credentials
+
+#define WIFI_SSID      "YOUR_WIFI_SSID"
+#define WIFI_PASS      "YOUR_WIFI_PASSWORD"
+#define MAX_RETRY      10
+
+// GPIO Pin Configuration
+// Modify these if you need to use different pins (Default values are confirmed working, so you probably shouldnt change them)
+
+#define RF_RECEIVER_PIN    GPIO_NUM_4
+#define RF_TRANSMITTER_PIN GPIO_NUM_2
+
+// Supported GPIO pins for ESP32 (except those that are input-only or reserved):
+// Most usable pins: GPIO_NUM_0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 19,
+//                   21, 22, 23, 25, 26, 27, 32, 33
+// Avoid if possible: GPIO_NUM_6-11 (used for flash memory), 34-39 (input only)
+//
+// Reference: https://github.com/Zebratic/esp32-433mhz-rf-controller/blob/main/images/esp32-diagram.png
+
+#endif // CONFIG_H
+
