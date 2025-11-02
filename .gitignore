@@ -21,8 +21,8 @@ dependencies.lock
 # Environment
 .env
 
-# WiFi Configuration (contains sensitive credentials)
-main/wifi_config.h
+# Configuration (contains sensitive credentials)
+main/config.h
 
 # OS
 .DS_Store
