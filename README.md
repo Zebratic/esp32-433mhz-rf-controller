@@ -1,39 +1,104 @@
 # ESP32 433MHz RF Controller
 
-An ESP32-based 433MHz RF signal receiver and transmitter with a modern web interface for capturing, storing, and retransmitting RF signals.
+Capture, store, and replay 433MHz RF signals with ESP32 using a web interface and REST API. Easily integrates with Home Assistant and other automation tools.
+
+<img src="images/subghz.png" alt="SubGHz Demo" height="100"/>
+<img src="images/home-assistant.png" alt="Home Assistant Integration" height="100"/>
+
+> Works like the Flipper Zero's SubGHz module, but with a modern web interface and REST API.
 
 ![Signal History](images/signals-history.png)
 
+## Table of Contents
+
+- [Features](#features)
+  - [Why Are Some Features Not Planned? ❌](#why-are-some-features-not-planned-❌)
+- [Hardware Requirements 🔌](#hardware-requirements-)
+- [GPIO Connections](#gpio-connections)
+  - [Pin Connections](#pin-connections)
+  - [General Setup Notes](#general-setup-notes)
+- [Setup and Compilation ⚙️](#setup-and-compilation-)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Build and Flash](#build-and-flash)
+  - [Access the Web Interface](#access-the-web-interface)
+- [Web Interface 🌐](#web-interface-)
+  - [Monitor Tab](#monitor-tab)
+  - [Signals Tab](#signals-tab)
+  - [Manual Tab](#manual-tab)
+  - [Settings Tab](#settings-tab)
+- [API Documentation 📚](#api-documentation-)
+- [Development](#development)
+  - [Project Structure](#project-structure)
+  - [Building](#building)
+- [Contributing 🤝](#contributing-)
+
 ## Features
 
-- **Real-time Signal Monitoring**: Automatically captures and displays 433MHz RF signals with live updates
-- **Signal History Tracking**: Tracks all detected signals with relative timestamps (e.g., "2m 1s ago") and detection counts
-- **Signal Management**: Save, edit, and delete captured signals with custom names
-- **Direct Signal Transmission**: Replay signals instantly without saving, or transmit from your saved library
-- **Manual Signal Entry**: Create and transmit custom signals manually
-- **Advanced Noise Filtering**: Intelligent filtering to reduce false positives and noise
-- **Modern Web Interface**: Dark mode, responsive UI with minimalistic, blocky design
-- **RESTful API**: Complete API for programmatic control
-- **Persistent Storage**: Signals saved to non-volatile storage (NVS) survive reboots
-- **Settings Management**: Configurable parameters via web interface
+| Feature                         | Description                                              | Status   |
+|---------------------------------|----------------------------------------------------------|----------|
+| **Live Signal Capture**         | Watch 433MHz RF signals appear instantly                 | ✅        |
+| **One-click Replay**            | Instantly resend any signal                              | ✅        |
+| **Safe Storage**                | Signals saved even after reboot                          | ✅        |
+| **History & Library**           | View, save, edit, or delete signals easily               | ✅        |
+| **REST API**                    | Automate with Home Assistant or other tools              | ✅        |
+| **Easy Settings**               | Tweak everything via the web interface                   | ✅        |
+| **Manual Entry**                | Add your own custom signals                              | ✅        |
+| **Smart Filtering**             | Reduces noise and false positives                        | ✅        |
+| **Signal Labeling**             | Attach meaningful names and tags to signals              | 🔜 Planned |
+| **Multi-frequency Support**     | Work with additional frequencies (315/868MHz, etc.)      | 🔜 Planned |
+| **Access Control**              | Limit access to the web interface behind a username, password and API key       | 🔜 Planned |
+| **Signal Analytics**            | Visualize signal usage stats and patterns                | 🔜 Planned |
+| **Schedule Automation**         | Trigger specific RF signals on a schedule                | ❌ Not Planned |
+| **Over-the-Air Firmware Updates** | Update device firmware wirelessly from the web interface | ❌ Not Planned |
+| **Cloud Integration**           | Direct connection to third-party cloud services          | ❌ Not Planned |
+| **Voice Assistant Support**     | Native Alexa/Google Assistant integration                | ❌ Not Planned |
 
-## Hardware Requirements
+### Why Are Some Features Not Planned? ❌
+
+Some features, such as voice assistant support, cloud integrations, and OTA updates, are marked as `❌ Not Planned` to keep the project simple, stable, and easy to maintain. These advanced features add complexity and require significant development time. Most of their functionality can still be achieved by integrating the REST API with tools like Home Assistant.
+
+If you need a feature that’s not planned, there’s a good chance you can build it yourself on top of the provided APIs!
+
+## Hardware Requirements 🔌
 
 - ESP32 DevKit (any variant)
 - 433MHz RF Receiver Module
 - 433MHz RF Transmitter Module
 - Breadboard and jumper wires (optional)
 
+This project was tested with **FS1000A RF Transmitter** and **XY-MK-5V RF Receiver** modules. These are affordable, widely available, and work well with the ESP32. They typically run on 5V, but some variants can operate at 3.3V (check your module specs).
+
+![Transmitter and Receiver Modules](images/transmitter-receiver.png)
+
 ## GPIO Connections
 
 ![ESP32 Wiring Diagram](images/esp32-diagram.png)
 
-- **RF Receiver**: GPIO 4
-- **RF Transmitter**: GPIO 2
+### Pin Connections
 
-Refer to the wiring diagram above for visual connection guide.
+- **RF Receiver Module**
+  - **VCC**: Connect to 3.3V or 5V* pin on the ESP32 (check your module’s voltage requirements)
+  - **GND**: Connect to any ground (GND) pin on the ESP32
+  - **DATA**: Connect the data pin to **GPIO 4** on the ESP32.  
+    > **Note:** Many RF receiver modules come with 2 DATA pins. If you're unsure which to use, simply try one; if it doesn't work, switch to the other.
 
-## Setup and Compilation
+- **RF Transmitter Module**
+  - **VCC**: Connect to 3.3V or 5V* pin on the ESP32 (reference your module specs)
+  - **GND**: Connect to any ground (GND) pin on the ESP32
+  - **DATA**: Connect to **GPIO 2** on the ESP32
+
+> *Many cheap 433MHz modules require 5V for best performance, but some can operate at 3.3V. Double-check before powering to avoid damage to your ESP32.*
+
+### General Setup Notes
+
+- Use short jumper wires for cleaner signals.
+- Adding a short antenna (17-23 cm wire) to the ANT pin on each module will significantly improve range and reliability.
+- Some ESP32 boards label GPIO numbers as “Dxx” or have different layouts, always confirm with your board’s pinout reference.
+
+For additional guidance, refer to the included ESP32 DevKit pinout diagram and your RF module datasheets. Incorrect connections may result in unreliable operation or hardware damage.
+
+## Setup and Compilation ⚙️
 
 ### Prerequisites
 
@@ -43,8 +108,8 @@ Refer to the wiring diagram above for visual connection guide.
 
 2. **Clone the Repository**
    ```bash
-   git clone <repository-url>
-   cd esp-433mhz-transmitter
+   git clone https://github.com/Zebratic/esp32-433mhz-rf-controller.git
+   cd esp32-433mhz-rf-controller
    ```
 
 ### Configuration
@@ -79,12 +144,13 @@ Refer to the wiring diagram above for visual connection guide.
    ```
    Replace `/dev/ttyUSB0` with your ESP32's serial port.
 
-3. **Access the Web Interface**
-   - The ESP32 will print its IP address to the serial monitor
-   - Open a browser and navigate to `http://<esp32-ip-address>`
-   - Example: `http://192.168.1.100`
+### Access the Web Interface
 
-## Web Interface
+- The ESP32 will print its IP address to the serial monitor
+- Open a browser and navigate to `http://<esp32-ip-address>`
+- Example: `http://192.168.1.100`
+
+## Web Interface 🌐
 
 The web interface provides four main tabs:
 
@@ -111,7 +177,7 @@ The web interface provides four main tabs:
 - Configure various settings
 - Settings are saved to browser's local storage
 
-## API Documentation
+## API Documentation 📚
 
 The ESP32 provides a RESTful API for programmatic control. All endpoints return JSON responses.
 
@@ -135,7 +201,7 @@ For detailed API documentation with request/response examples, see the **API** t
 ### Project Structure
 
 ```
-esp-433mhz-transmitter/
+esp32-433mhz-rf-controller/
 ├── main/
 │   ├── main.c              # Main application code
 │   ├── CMakeLists.txt     # Build configuration
@@ -156,15 +222,16 @@ esp-433mhz-transmitter/
 The `build.sh` script handles ESP-IDF environment setup and building:
 
 ```bash
-./build.sh build    # Build the project
-./build.sh flash    # Flash to ESP32
-./build.sh monitor  # Open serial monitor
+./build.sh build                # Only build the project
+./build.sh flash [port]         # Build and flash to ESP32
+./build.sh monitor [port]       # Only open serial monitor
+./build.sh flash monitor [port] # Build, flash, and open serial monitor
+./build.sh clean                # Clean build files
+./build.sh menuconfig           # Open ESP-IDF configuration menu
 ```
 
-## License
+**Pro Tip:** Press `Ctrl + T` & `Ctrl + X` to exit the serial monitor.
 
-Open-source project. Refer to the LICENSE file for details.
-
-## Contributing
+## Contributing 🤝
 
 Contributions are welcome! Please feel free to submit a Pull Request.
